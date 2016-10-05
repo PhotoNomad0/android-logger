@@ -24,6 +24,11 @@ public abstract class Reporter {
     private String username = null;
     private String password = null;
 
+    private int responseCode = -1;
+
+     private String responseString = null;
+    private String errorString = null;
+
     /**
      * Creates a new reporter that posts data to the given url
      * @param url the url that can receive the report
@@ -54,6 +59,18 @@ public abstract class Reporter {
         this.password = password;
     }
 
+    public int getResponseCode() {
+        return responseCode;
+    }
+
+    public String getResponseString() {
+        return responseString;
+    }
+
+    public String getErrorString() {
+        return errorString;
+    }
+
     /**
      * Generates and returns the auth information if available
      * @return
@@ -81,7 +98,7 @@ public abstract class Reporter {
         try {
             URL url = new URL(this.url);
             HttpURLConnection conn;
-            if(url.getProtocol() == "https") {
+            if(url.getProtocol().equals("https")) {
                 conn = (HttpsURLConnection)url.openConnection();
             } else {
                 conn = (HttpURLConnection)url.openConnection();
@@ -108,11 +125,18 @@ public abstract class Reporter {
             while ((current = bis.read()) != -1) {
                 baos.write((byte) current);
             }
-            return baos.toString("UTF-8");
+            responseCode = conn.getResponseCode();
+            responseString =  baos.toString("UTF-8");
+            return responseString;
+
         } catch (IOException e) {
             e.printStackTrace();
+            errorString = e.toString();
         }
 
-        return null;
+        responseString = null;
+        return responseString;
     }
+
+    // TODO: 10/5/16 add method to determine if there was an error
 }
